@@ -1,325 +1,511 @@
-
-
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>حاسبة الأوردر</title>
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
-<style>
-:root{
-  --cream:#FBF3EA;
-  --card:#FFFFFF;
-  --brown:#43281C;
-  --brown-soft:#7A5B48;
-  --rust:#B5502E;
-  --rust-dark:#8F3D22;
-  --olive:#7C8450;
-  --line:#E7D9CB;
-  --pink:#F4DDD0;
-  padding-top: env(safe-area-inset-top, 0px);
-  padding-bottom: env(safe-area-inset-bottom, 0px);
-  box-sizing:border-box;
-}
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-    --cream:#241812; --card:#33231A; --brown:#F3E7DC; --brown-soft:#CBB29E;
-    --rust:#E08A5F; --rust-dark:#F0A87C; --line:#4A3527; --pink:#4A3327;
-  }
-}
-:root[data-theme="dark"]{
-  --cream:#241812; --card:#33231A; --brown:#F3E7DC; --brown-soft:#CBB29E;
-  --rust:#E08A5F; --rust-dark:#F0A87C; --line:#4A3527; --pink:#4A3327;
-}
-*{box-sizing:border-box;}
-html{scroll-padding-top: env(safe-area-inset-top, 0px);}
-body{
-  margin:0; background:var(--cream); color:var(--brown);
-  font-family:'Cairo',sans-serif;
-  min-height:100%;
-  padding-bottom: calc(90px + env(safe-area-inset-bottom,0px));
-}
-header{
-  padding:22px 18px 10px;
-  text-align:center;
-}
-header h1{
-  font-size:22px; font-weight:800; margin:0 0 4px;
-  color:var(--rust-dark);
-}
-header p{margin:0; color:var(--brown-soft); font-size:13px;}
- 
-.tabs{
-  display:flex; gap:8px; padding:14px 16px; overflow-x:auto;
-  position:sticky; top:0; background:var(--cream); z-index:5;
-  border-bottom:1px solid var(--line);
-}
-.tab{
-  flex:0 0 auto; padding:9px 18px; border-radius:999px;
-  background:var(--card); border:1px solid var(--line);
-  color:var(--brown-soft); font-family:inherit; font-weight:700; font-size:14px;
-  cursor:pointer; transition:.15s;
-}
-.tab.active{
-  background:var(--rust); color:#fff; border-color:var(--rust);
-}
- 
-main{padding:14px 16px 10px; max-width:720px; margin:0 auto;}
- 
-.grid{
-  display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
-  gap:12px;
-}
-.card{
-  background:var(--card); border:1px solid var(--line); border-radius:14px;
-  padding:14px; display:flex; flex-direction:column; gap:10px;
-}
-.card h3{
-  margin:0; font-size:15px; font-weight:700; line-height:1.35;
-  min-height:40px;
-}
-.qtyrow{display:flex; flex-direction:column; gap:6px;}
-.qtybtn{
-  display:flex; justify-content:space-between; align-items:center;
-  background:var(--pink); border:none; border-radius:9px;
-  padding:8px 10px; font-family:inherit; cursor:pointer;
-  color:var(--brown); font-size:13px; font-weight:600;
-  transition:.12s;
-}
-.qtybtn:active{transform:scale(.97);}
-.qtybtn .lbl{color:var(--brown-soft);}
-.qtybtn .val{font-weight:800; color:var(--rust-dark);}
-.qtybtn .count{
-  background:var(--rust); color:#fff; border-radius:999px;
-  min-width:20px; height:20px; display:inline-flex; align-items:center; justify-content:center;
-  font-size:11px; margin-inline-start:6px; padding:0 5px;
-}
- 
-.cartbar{
-  position:fixed; bottom:0; inset-inline:0; z-index:20;
-  background:var(--brown); color:var(--cream);
-  padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));
-  display:flex; justify-content:space-between; align-items:center;
-  cursor:pointer;
-}
-.cartbar .l1{font-size:13px; opacity:.75;}
-.cartbar .l2{font-size:19px; font-weight:800; color:var(--rust);}
- 
-.sheet{
-  position:fixed; inset-inline:0; bottom:0; z-index:30;
-  background:var(--card); border-radius:18px 18px 0 0;
-  max-height:75vh; overflow-y:auto; overscroll-behavior:contain;
-  box-shadow:0 -10px 30px rgba(0,0,0,.25);
-  transform:translateY(100%); transition:transform .25s ease;
-  padding: 16px 16px calc(16px + env(safe-area-inset-bottom,0px));
-}
-.sheet.open{transform:translateY(0);}
-.sheet h2{margin:0 0 12px; font-size:17px;}
-.sheet-item{
-  display:flex; justify-content:space-between; align-items:center;
-  padding:10px 0; border-bottom:1px solid var(--line); gap:10px;
-}
-.sheet-item .name{font-size:14px; font-weight:700; flex:1;}
-.sheet-item .sub{font-size:12px; color:var(--brown-soft);}
-.sheet-item .price{font-weight:800; color:var(--rust-dark); font-size:14px;}
-.remove{
-  background:none; border:none; color:var(--brown-soft); font-size:18px;
-  cursor:pointer; padding:4px 8px;
-}
-.sheet .total{
-  display:flex; justify-content:space-between; padding:14px 0 4px;
-  font-size:17px; font-weight:800;
-}
-.empty{color:var(--brown-soft); text-align:center; padding:30px 0; font-size:14px;}
-.closebtn{
-  width:100%; margin-top:10px; padding:12px; border:none; border-radius:10px;
-  background:var(--rust); color:#fff; font-family:inherit; font-weight:700;
-  font-size:15px; cursor:pointer;
-}
-.overlay{
-  position:fixed; inset:0; background:rgba(0,0,0,.35); z-index:25;
-  opacity:0; pointer-events:none; transition:opacity .2s;
-}
-.overlay.open{opacity:1; pointer-events:auto;}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>حاسبة الأوردر</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --cream: #FBF3EA;
+            --card: #FFFFFF;
+            --brown: #43281C;
+            --brown-soft: #7A5B48;
+            --rust: #B5502E;
+            --rust-dark: #8F3D22;
+            --olive: #7C8450;
+            --line: #E7D9CB;
+            --pink: #F4DDD0;
+            padding-top: env(safe-area-inset-top, 0px);
+            padding-bottom: env(safe-area-inset-bottom, 0px);
+            box-sizing: border-box;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root:not([data-theme="light"]) {
+                --cream: #241812;
+                --card: #33231A;
+                --brown: #F3E7DC;
+                --brown-soft: #CBB29E;
+                --rust: #E08A5F;
+                --rust-dark: #F0A87C;
+                --line: #4A3527;
+                --pink: #4A3327;
+            }
+        }
+
+        :root[data-theme="dark"] {
+            --cream: #241812;
+            --card: #33231A;
+            --brown: #F3E7DC;
+            --brown-soft: #CBB29E;
+            --rust: #E08A5F;
+            --rust-dark: #F0A87C;
+            --line: #4A3527;
+            --pink: #4A3327;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-padding-top: env(safe-area-inset-top, 0px);
+        }
+
+        body {
+            margin: 0;
+            background: var(--cream);
+            color: var(--brown);
+            font-family: 'Cairo', sans-serif;
+            min-height: 100%;
+            padding-bottom: calc(90px + env(safe-area-inset-bottom, 0px));
+        }
+
+        header {
+            padding: 22px 18px 10px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 22px;
+            font-weight: 800;
+            margin: 0 0 4px;
+            color: var(--rust-dark);
+        }
+
+        header p {
+            margin: 0;
+            color: var(--brown-soft);
+            font-size: 13px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            padding: 14px 16px;
+            overflow-x: auto;
+            position: sticky;
+            top: 0;
+            background: var(--cream);
+            z-index: 5;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .tab {
+            flex: 0 0 auto;
+            padding: 9px 18px;
+            border-radius: 999px;
+            background: var(--card);
+            border: 1px solid var(--line);
+            color: var(--brown-soft);
+            font-family: inherit;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            transition: .15s;
+        }
+
+        .tab.active {
+            background: var(--rust);
+            color: #fff;
+            border-color: var(--rust);
+        }
+
+        main {
+            padding: 14px 16px 10px;
+            max-width: 720px;
+            margin: 0 auto;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 12px;
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .card h3 {
+            margin: 0;
+            font-size: 15px;
+            font-weight: 700;
+            line-height: 1.35;
+            min-height: 40px;
+        }
+
+        .qtyrow {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .qtybtn {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--pink);
+            border: none;
+            border-radius: 9px;
+            padding: 8px 10px;
+            font-family: inherit;
+            cursor: pointer;
+            color: var(--brown);
+            font-size: 13px;
+            font-weight: 600;
+            transition: .12s;
+        }
+
+        .qtybtn:active {
+            transform: scale(.97);
+        }
+
+        .qtybtn .lbl {
+            color: var(--brown-soft);
+        }
+
+        .qtybtn .val {
+            font-weight: 800;
+            color: var(--rust-dark);
+        }
+
+        .qtybtn .count {
+            background: var(--rust);
+            color: #fff;
+            border-radius: 999px;
+            min-width: 20px;
+            height: 20px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            margin-inline-start: 6px;
+            padding: 0 5px;
+        }
+
+        .cartbar {
+            position: fixed;
+            bottom: 0;
+            inset-inline: 0;
+            z-index: 20;
+            background: var(--brown);
+            color: var(--cream);
+            padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px));
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .cartbar .l1 {
+            font-size: 13px;
+            opacity: .75;
+        }
+
+        .cartbar .l2 {
+            font-size: 19px;
+            font-weight: 800;
+            color: var(--rust);
+        }
+
+        .sheet {
+            position: fixed;
+            inset-inline: 0;
+            bottom: 0;
+            z-index: 30;
+            background: var(--card);
+            border-radius: 18px 18px 0 0;
+            max-height: 75vh;
+            overflow-y: auto;
+            overscroll-behavior: contain;
+            box-shadow: 0 -10px 30px rgba(0, 0, 0, .25);
+            transform: translateY(100%);
+            transition: transform .25s ease;
+            padding: 16px 16px calc(16px + env(safe-area-inset-bottom, 0px));
+        }
+
+        .sheet.open {
+            transform: translateY(0);
+        }
+
+        .sheet h2 {
+            margin: 0 0 12px;
+            font-size: 17px;
+        }
+
+        .sheet-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--line);
+            gap: 10px;
+        }
+
+        .sheet-item .name {
+            font-size: 14px;
+            font-weight: 700;
+            flex: 1;
+        }
+
+        .sheet-item .sub {
+            font-size: 12px;
+            color: var(--brown-soft);
+        }
+
+        .sheet-item .price {
+            font-weight: 800;
+            color: var(--rust-dark);
+            font-size: 14px;
+        }
+
+        .remove {
+            background: none;
+            border: none;
+            color: var(--brown-soft);
+            font-size: 18px;
+            cursor: pointer;
+            padding: 4px 8px;
+        }
+
+        .sheet .total {
+            display: flex;
+            justify-content: space-between;
+            padding: 14px 0 4px;
+            font-size: 17px;
+            font-weight: 800;
+        }
+
+        .empty {
+            color: var(--brown-soft);
+            text-align: center;
+            padding: 30px 0;
+            font-size: 14px;
+        }
+
+        .closebtn {
+            width: 100%;
+            margin-top: 10px;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            background: var(--rust);
+            color: #fff;
+            font-family: inherit;
+            font-weight: 700;
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .35);
+            z-index: 25;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .2s;
+        }
+
+        .overlay.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+    </style>
 </head>
+
 <body>
- 
-<header>
-  <h1>حاسبة الأوردر</h1>
-  <p>اختار الصنف وحدد الكمية، وهيتحسب السعر لوحده</p>
-</header>
- 
-<nav class="tabs" id="tabs"></nav>
- 
-<main><div class="grid" id="grid"></div></main>
- 
-<div class="overlay" id="overlay"></div>
-<div class="sheet" id="sheet">
-  <h2>تفاصيل الأوردر</h2>
-  <div id="sheetItems"></div>
-  <button class="closebtn" id="closeSheet">رجوع</button>
-</div>
- 
-<div class="cartbar" id="cartbar">
-  <div>
-    <div class="l1" id="cartCount">الأوردر فاضي</div>
-    <div class="l2" id="cartTotal">0 جنيه</div>
-  </div>
-  <div style="font-size:13px; opacity:.75;">تفاصيل ⟵</div>
-</div>
- 
-<script>
-const DATA = {
-  "مكسرات": [
-    {n:"لوز مملح جامبو", p:{ربع:175,نص:345,كيلو:690}},
-    {n:"لوز مملح وسط", p:{ربع:157,نص:315,كيلو:630}},
-    {n:"بيكان أمريكي ني", p:{ربع:325,نص:650,كيلو:1300}},
-    {n:"ماكاديميا", p:{ربع:363,نص:725,كيلو:1450}},
-    {n:"لوز مدخن", p:{ربع:175,نص:345,كيلو:690}},
-    {n:"كاجو مدخن", p:{ربع:175,نص:345,كيلو:690}},
-    {n:"لوز قلب أنصاف", p:{ربع:175,نص:345,كيلو:690}},
-    {n:"بذر يقطين", p:{ربع:106,نص:212,كيلو:425}},
-    {n:"فستق قلب حلبي", p:{ربع:387,نص:775,كيلو:1550}},
-    {n:"عين جمل نصين", p:{ربع:132,نص:265,كيلو:530}},
-    {n:"عين جمل فراشة", p:{ربع:150,نص:300,كيلو:600}},
-    {n:"عين جمل رايز", p:{ربع:178,نص:355,كيلو:710}},
-    {n:"لوز بقشره", p:{ربع:93,نص:185,كيلو:370}},
-    {n:"عين الجمل بقشره", p:{ربع:93,نص:185,كيلو:370}},
-    {n:"مكسرات مشكل وسط", p:{ربع:180,نص:360,كيلو:720}},
-    {n:"مكسرات مشكل جامبو", p:{ربع:210,نص:420,كيلو:840}},
-    {n:"كاجو كبير", p:{ربع:210,نص:420,كيلو:840}},
-    {n:"كاجو وسط", p:{ربع:180,نص:355,كيلو:710}},
-    {n:"كاجو صغير", p:{ربع:165,نص:325,كيلو:650}},
-    {n:"فستق صغير", p:{ربع:165,نص:330,كيلو:660}},
-    {n:"فستق وسط", p:{ربع:205,نص:405,كيلو:810}},
-    {n:"فستق أمريكي", p:{ربع:215,نص:425,كيلو:850}},
-    {n:"بندق محمص", p:{ربع:260,نص:520,كيلو:1040}},
-    {n:"بندق ني", p:{ربع:245,نص:485,كيلو:970}}
-  ],
-  "تسالي": [
-    {n:"سوداني بقشره", p:{ربع:50,نص:95,كيلو:190}},
-    {n:"سوداني حلواني", p:{ربع:60,نص:110,كيلو:220}},
-    {n:"سوداني مدخن", p:{ربع:75,نص:145,كيلو:290}},
-    {n:"لب أبيض", p:{ربع:85,نص:165,كيلو:330}},
-    {n:"لب سوبر وسط", p:{ربع:55,نص:100,كيلو:195}},
-    {n:"لب سوبر كبير", p:{ربع:70,نص:135,كيلو:270}},
-    {n:"لب سوري صغير", p:{ربع:30,نص:50,كيلو:100}},
-    {n:"لب سوري كبير", p:{ربع:45,نص:85,كيلو:170}},
-    {n:"لب خشب", p:{ربع:80,نص:150,كيلو:300}},
-    {n:"لب يقطين", p:{ربع:95,نص:180,كيلو:360}}
-  ],
-  "شوكولاتات": [
-    {n:"بسكوت ميجا", p:{ربع:70,نص:135,كيلو:270}},
-    {n:"بسكوت ايليت", p:{ربع:65,نص:130,كيلو:260}},
-    {n:"بسكوت بولا", p:{ربع:65,نص:130,كيلو:260}}
-  ]
-};
- 
-const cats = Object.keys(DATA);
-let activeCat = cats[0];
-let cart = {}; // key: "name|qtyLabel" -> {name, qtyLabel, price, count}
- 
-const tabsEl = document.getElementById('tabs');
-const gridEl = document.getElementById('grid');
- 
-function renderTabs(){
-  tabsEl.innerHTML = cats.map(c =>
-    `<button class="tab ${c===activeCat?'active':''}" data-cat="${c}">${c}</button>`
-  ).join('');
-  tabsEl.querySelectorAll('.tab').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      activeCat = btn.dataset.cat;
-      renderTabs(); renderGrid();
-    });
-  });
-}
- 
-function cartKey(name, qtyLabel){ return name+'|'+qtyLabel; }
- 
-function renderGrid(){
-  const items = DATA[activeCat];
-  gridEl.innerHTML = items.map(item=>{
-    const rows = Object.entries(item.p).map(([qtyLabel, price])=>{
-      const key = cartKey(item.n, qtyLabel);
-      const count = cart[key] ? cart[key].count : 0;
-      return `<button class="qtybtn" data-name="${item.n}" data-qty="${qtyLabel}" data-price="${price}">
+
+    <header>
+        <h1>حاسبة الأوردر</h1>
+        <p>اختار الصنف وحدد الكمية، وهيتحسب السعر لوحده</p>
+    </header>
+
+    <nav class="tabs" id="tabs"></nav>
+
+    <main>
+        <div class="grid" id="grid"></div>
+    </main>
+
+    <div class="overlay" id="overlay"></div>
+    <div class="sheet" id="sheet">
+        <h2>تفاصيل الأوردر</h2>
+        <div id="sheetItems"></div>
+        <button class="closebtn" id="closeSheet">رجوع</button>
+    </div>
+
+    <div class="cartbar" id="cartbar">
+        <div>
+            <div class="l1" id="cartCount">الأوردر فاضي</div>
+            <div class="l2" id="cartTotal">0 جنيه</div>
+        </div>
+        <div style="font-size:13px; opacity:.75;">تفاصيل ⟵</div>
+    </div>
+
+    <script>
+        const DATA = {
+            "مكسرات": [
+                { n: "لوز مملح جامبو", p: { ربع: 175, نص: 345, كيلو: 690 } },
+                { n: "لوز مملح وسط", p: { ربع: 157, نص: 315, كيلو: 630 } },
+                { n: "بيكان أمريكي ني", p: { ربع: 325, نص: 650, كيلو: 1300 } },
+                { n: "ماكاديميا", p: { ربع: 363, نص: 725, كيلو: 1450 } },
+                { n: "لوز مدخن", p: { ربع: 175, نص: 345, كيلو: 690 } },
+                { n: "كاجو مدخن", p: { ربع: 175, نص: 345, كيلو: 690 } },
+                { n: "لوز قلب أنصاف", p: { ربع: 175, نص: 345, كيلو: 690 } },
+                { n: "بذر يقطين", p: { ربع: 106, نص: 212, كيلو: 425 } },
+                { n: "فستق قلب حلبي", p: { ربع: 387, نص: 775, كيلو: 1550 } },
+                { n: "عين جمل نصين", p: { ربع: 132, نص: 265, كيلو: 530 } },
+                { n: "عين جمل فراشة", p: { ربع: 150, نص: 300, كيلو: 600 } },
+                { n: "عين جمل رايز", p: { ربع: 178, نص: 355, كيلو: 710 } },
+                { n: "لوز بقشره", p: { ربع: 93, نص: 185, كيلو: 370 } },
+                { n: "عين الجمل بقشره", p: { ربع: 93, نص: 185, كيلو: 370 } },
+                { n: "مكسرات مشكل وسط", p: { ربع: 180, نص: 360, كيلو: 720 } },
+                { n: "مكسرات مشكل جامبو", p: { ربع: 210, نص: 420, كيلو: 840 } },
+                { n: "كاجو كبير", p: { ربع: 210, نص: 420, كيلو: 840 } },
+                { n: "كاجو وسط", p: { ربع: 180, نص: 355, كيلو: 710 } },
+                { n: "كاجو صغير", p: { ربع: 165, نص: 325, كيلو: 650 } },
+                { n: "فستق صغير", p: { ربع: 165, نص: 330, كيلو: 660 } },
+                { n: "فستق وسط", p: { ربع: 205, نص: 405, كيلو: 810 } },
+                { n: "فستق أمريكي", p: { ربع: 215, نص: 425, كيلو: 850 } },
+                { n: "بندق محمص", p: { ربع: 260, نص: 520, كيلو: 1040 } },
+                { n: "بندق ني", p: { ربع: 245, نص: 485, كيلو: 970 } }
+            ],
+            "تسالي": [
+                { n: "سوداني بقشره", p: { ربع: 50, نص: 95, كيلو: 190 } },
+                { n: "سوداني حلواني", p: { ربع: 60, نص: 110, كيلو: 220 } },
+                { n: "سوداني مدخن", p: { ربع: 75, نص: 145, كيلو: 290 } },
+                { n: "لب أبيض", p: { ربع: 85, نص: 165, كيلو: 330 } },
+                { n: "لب سوبر وسط", p: { ربع: 55, نص: 100, كيلو: 195 } },
+                { n: "لب سوبر كبير", p: { ربع: 70, نص: 135, كيلو: 270 } },
+                { n: "لب سوري صغير", p: { ربع: 30, نص: 50, كيلو: 100 } },
+                { n: "لب سوري كبير", p: { ربع: 45, نص: 85, كيلو: 170 } },
+                { n: "لب خشب", p: { ربع: 80, نص: 150, كيلو: 300 } },
+                { n: "لب يقطين", p: { ربع: 95, نص: 180, كيلو: 360 } }
+            ],
+            "شوكولاتات": [
+
+                { n: "بسكوت ميجا", p: { ربع: 70, نص: 135, كيلو: 270 } },
+
+                { n: "بسكوت ايليت", p: { ربع: 65, نص: 130, كيلو: 260 } },
+
+                { n: "بسكوت بولا", p: { ربع: 65, نص: 130, كيلو: 260 } },
+
+                { n: "شوكولاتة جامي", p: { ربع: 90, نص: 180, كيلو: 360 } }
+
+            ]
+        };
+
+        const cats = Object.keys(DATA);
+        let activeCat = cats[0];
+        let cart = {}; // key: "name|qtyLabel" -> {name, qtyLabel, price, count}
+
+        const tabsEl = document.getElementById('tabs');
+        const gridEl = document.getElementById('grid');
+
+        function renderTabs() {
+            tabsEl.innerHTML = cats.map(c =>
+                `<button class="tab ${c === activeCat ? 'active' : ''}" data-cat="${c}">${c}</button>`
+            ).join('');
+            tabsEl.querySelectorAll('.tab').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    activeCat = btn.dataset.cat;
+                    renderTabs(); renderGrid();
+                });
+            });
+        }
+
+        function cartKey(name, qtyLabel) { return name + '|' + qtyLabel; }
+
+        function renderGrid() {
+            const items = DATA[activeCat];
+            gridEl.innerHTML = items.map(item => {
+                const rows = Object.entries(item.p).map(([qtyLabel, price]) => {
+                    const key = cartKey(item.n, qtyLabel);
+                    const count = cart[key] ? cart[key].count : 0;
+                    return `<button class="qtybtn" data-name="${item.n}" data-qty="${qtyLabel}" data-price="${price}">
         <span class="lbl">${qtyLabel}</span>
-        <span class="val">${price}${count?`<span class="count">${count}</span>`:''}</span>
+        <span class="val">${price}${count ? `<span class="count">${count}</span>` : ''}</span>
       </button>`;
-    }).join('');
-    return `<div class="card"><h3>${item.n}</h3><div class="qtyrow">${rows}</div></div>`;
-  }).join('');
- 
-  gridEl.querySelectorAll('.qtybtn').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      const name = btn.dataset.name, qtyLabel = btn.dataset.qty, price = Number(btn.dataset.price);
-      const key = cartKey(name, qtyLabel);
-      if(!cart[key]) cart[key] = {name, qtyLabel, price, count:0};
-      cart[key].count++;
-      renderGrid();
-      renderCart();
-    });
-  });
-}
- 
-const cartbar = document.getElementById('cartbar');
-const cartCount = document.getElementById('cartCount');
-const cartTotal = document.getElementById('cartTotal');
-const sheet = document.getElementById('sheet');
-const overlay = document.getElementById('overlay');
-const sheetItems = document.getElementById('sheetItems');
- 
-function getEntries(){ return Object.values(cart).filter(e=>e.count>0); }
- 
-function renderCart(){
-  const entries = getEntries();
-  const totalCount = entries.reduce((s,e)=>s+e.count,0);
-  const totalPrice = entries.reduce((s,e)=>s+e.count*e.price,0);
-  cartCount.textContent = totalCount ? `${totalCount} صنف في الأوردر` : 'الأوردر فاضي';
-  cartTotal.textContent = `${totalPrice} جنيه`;
- 
-  if(entries.length===0){
-    sheetItems.innerHTML = `<div class="empty">لسه مفيش حاجه في الأوردر</div>`;
-  } else {
-    sheetItems.innerHTML = entries.map(e=>{
-      const key = cartKey(e.name, e.qtyLabel);
-      return `<div class="sheet-item">
+                }).join('');
+                return `<div class="card"><h3>${item.n}</h3><div class="qtyrow">${rows}</div></div>`;
+            }).join('');
+
+            gridEl.querySelectorAll('.qtybtn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const name = btn.dataset.name, qtyLabel = btn.dataset.qty, price = Number(btn.dataset.price);
+                    const key = cartKey(name, qtyLabel);
+                    if (!cart[key]) cart[key] = { name, qtyLabel, price, count: 0 };
+                    cart[key].count++;
+                    renderGrid();
+                    renderCart();
+                });
+            });
+        }
+
+        const cartbar = document.getElementById('cartbar');
+        const cartCount = document.getElementById('cartCount');
+        const cartTotal = document.getElementById('cartTotal');
+        const sheet = document.getElementById('sheet');
+        const overlay = document.getElementById('overlay');
+        const sheetItems = document.getElementById('sheetItems');
+
+        function getEntries() { return Object.values(cart).filter(e => e.count > 0); }
+
+        function renderCart() {
+            const entries = getEntries();
+            const totalCount = entries.reduce((s, e) => s + e.count, 0);
+            const totalPrice = entries.reduce((s, e) => s + e.count * e.price, 0);
+            cartCount.textContent = totalCount ? `${totalCount} صنف في الأوردر` : 'الأوردر فاضي';
+            cartTotal.textContent = `${totalPrice} جنيه`;
+
+            if (entries.length === 0) {
+                sheetItems.innerHTML = `<div class="empty">لسه مفيش حاجه في الأوردر</div>`;
+            } else {
+                sheetItems.innerHTML = entries.map(e => {
+                    const key = cartKey(e.name, e.qtyLabel);
+                    return `<div class="sheet-item">
         <div>
           <div class="name">${e.name}</div>
           <div class="sub">${e.qtyLabel} × ${e.count}</div>
         </div>
-        <div class="price">${e.count*e.price} جنيه</div>
+        <div class="price">${e.count * e.price} جنيه</div>
         <button class="remove" data-key="${key}">✕</button>
       </div>`;
-    }).join('') + `<div class="total"><span>الإجمالي</span><span>${totalPrice} جنيه</span></div>`;
- 
-    sheetItems.querySelectorAll('.remove').forEach(btn=>{
-      btn.addEventListener('click', ()=>{
-        const key = btn.dataset.key;
-        if(cart[key]){
-          cart[key].count--;
-          if(cart[key].count<=0) delete cart[key];
+                }).join('') + `<div class="total"><span>الإجمالي</span><span>${totalPrice} جنيه</span></div>`;
+
+                sheetItems.querySelectorAll('.remove').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const key = btn.dataset.key;
+                        if (cart[key]) {
+                            cart[key].count--;
+                            if (cart[key].count <= 0) delete cart[key];
+                        }
+                        renderGrid(); renderCart();
+                    });
+                });
+            }
         }
-        renderGrid(); renderCart();
-      });
-    });
-  }
-}
- 
-function openSheet(){ sheet.classList.add('open'); overlay.classList.add('open'); }
-function closeSheet(){ sheet.classList.remove('open'); overlay.classList.remove('open'); }
- 
-cartbar.addEventListener('click', openSheet);
-overlay.addEventListener('click', closeSheet);
-document.getElementById('closeSheet').addEventListener('click', closeSheet);
- 
-renderTabs();
-renderGrid();
-renderCart();
-</script>
+
+        function openSheet() { sheet.classList.add('open'); overlay.classList.add('open'); }
+        function closeSheet() { sheet.classList.remove('open'); overlay.classList.remove('open'); }
+
+        cartbar.addEventListener('click', openSheet);
+        overlay.addEventListener('click', closeSheet);
+        document.getElementById('closeSheet').addEventListener('click', closeSheet);
+
+        renderTabs();
+        renderGrid();
+        renderCart();
+    </script>
 </body>
+
 </html>
- 
